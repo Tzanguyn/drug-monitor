@@ -22,8 +22,10 @@ exports.create = (req,res)=>{
     drug
         .save(drug)//use the save operation on drug
         .then(data => {
-            console.log(`${data.name} added to the database`) 
-            res.redirect('/manage');
+            //console.log(`${data.name} added to the database`) 
+            //res.redirect('/manage');
+            res.status(201).send({ message: `${data.name} added to the database`, data: data});
+
         })
         .catch(err =>{
             res.status(500).send({//catch error
@@ -65,7 +67,7 @@ exports.find = (req,res)=>{
 
 
 // edits a drug selected using its  ID
-exports.update = (req,res)=>{
+exports.update = async (req,res)=>{
     if(!req.body){
         return res
             .status(400)
@@ -73,40 +75,51 @@ exports.update = (req,res)=>{
     }
 
     const id = req.params.id;
-    Drugdb.findByIdAndUpdate(id, req.body, { useFindAndModify: false})
-        .then(data => {
-            if(!data){
-                res.status(404).send({ message : `Drug with id: ${id} cannot be updated`})
-            }else{
-                res.send(data);
-                //res.redirect('/');
-            }
-        })
-        .catch(err =>{
-            res.status(500).send({ message : "Error in updating drug information"})
-        })
 
+    try {
+        const updatedDrug = await Drugdb.findByIdAndUpdate(
+            id, 
+            req.body, 
+            { new: true, runValidators: true }
+        );
+
+        if(!updatedDrug){
+            return res.status(404).send({ message : `Drug with id: ${id} not found, cannot be updated`});
+        }
+
+        res.status(200).send({
+            message: "Drug updated successfully",
+            data: updatedDrug
+        });
+
+    } catch (err) {
+        res.status(500).send({ message : "Error updating drug information: " + err.message });
+    }
 }
+
 
 
 // deletes a drug using its drug ID
-exports.delete = (req,res)=>{
+exports.delete = async (req, res) => {
     const id = req.params.id;
 
-    Drugdb.findByIdAndDelete(id)
-        .then(data => {
-            if(!data){
-                res.status(404).send({ message : `Cannot Delete drug with id: ${id}. Pls check id`})
-            }else{
-                res.send({
-                    message : `${data.name} was deleted successfully!`
-                })
-            }
-        })
-        .catch(err =>{
-            res.status(500).send({
-                message: "Could not delete Drug with id=" + id
+    try {
+        const data = await Drugdb.findByIdAndDelete(id);
+
+        if (!data) {return res.status(404).send({ 
+                message: `Drug with id: ${id} not found, cannot delete` 
             });
+        }
+
+        res.status(200).send({
+            message: `${data.name} was deleted successfully!`,
+            deletedDrug: data
         });
 
-}
+    } catch (err) {
+        res.status(500).send({
+            message: "Error deleting drug with id=" + id,
+            error: err.message
+        });
+    }
+};

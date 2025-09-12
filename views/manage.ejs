@@ -19,6 +19,36 @@
 				<th>Action</th>
 			</tr>
 		</thead>
+<!-- Script xử lý xoá -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const deleteButtons = document.querySelectorAll(".delete");
+
+    deleteButtons.forEach(btn => {
+      btn.addEventListener("click", async function () {
+        const id = this.getAttribute("data-id");
+        if (confirm("Are you sure you want to delete this drug?")) {
+          try {
+            const response = await fetch(`/api/drugs/${id}`, {
+              method: "DELETE"
+            });
+
+            if (response.ok) {
+              alert("Drug deleted successfully!");
+              // Xóa row khỏi bảng mà không cần reload
+              this.closest("tr").remove();
+            } else {
+              const err = await response.json();
+              alert("Error: " + err.message);
+            }
+          } catch (error) {
+            alert("Request failed: " + error);
+          }
+        }
+      });
+    });
+  });
+</script>	
 		<tbody>
 			<!-- Loop through drugs -->
 			<% for(let i = 0; i < drugs.length; i++) {%>

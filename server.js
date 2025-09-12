@@ -1,5 +1,8 @@
 const express = require('express');//we installed express using npm previously and we are indicating that it would be used here
 const app = express(); //this assigns express to the variable "app" - anything else can be used.
+// Add middleware to parse JSON bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded bodies
 const bodyParser = require('body-parser');//body-parser makes it easier to deal with request content by making it easier to use
 const dotenv = require('dotenv').config();//indicates we would be using .env
 const morgan = require('morgan');//this logs requests so you can easily troubleshoot
