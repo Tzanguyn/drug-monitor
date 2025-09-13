@@ -88,6 +88,7 @@ exports.update = async (req,res)=>{
         }
 
         res.status(200).send({
+            success: true, 
             message: "Drug updated successfully",
             data: updatedDrug
         });
@@ -122,4 +123,37 @@ exports.delete = async (req, res) => {
             error: err.message
         });
     }
+};
+
+
+exports.purchase = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const quantity = Number(req.body.quantity);
+
+    if (!quantity || quantity <= 0) {
+      return res.status(400).json({ success: false, message: 'Quantity must be a positive number.' });
+    }
+
+    const drug = await Drugdb.findById(id);
+    if (!drug) {
+      return res.status(404).json({ success: false, message: 'Drug not found.' });
+    }
+
+    if (drug.pack < quantity) {
+      return res.status(400).json({ success: false, message: 'Not enough packs available.' });
+    }
+
+    drug.pack -= quantity;
+    await drug.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Purchased ${quantity} pack(s) of ${drug.name}.`,
+      remainingPack: drug.pack,
+      drug
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };

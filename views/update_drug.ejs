@@ -10,7 +10,7 @@
   <h2>Edit <%= drug.name %></h2>
 <p>Use the below form to edit <%= drug.name %></p>
  <!-- Update drug form -->
- <form method="POST" id="update_drug">
+ <form  id="update_drug" data-id="<%= drug._id %>">
     <div class="container d-flex flex-column align-items-stretch">
         <div class="row mb-3 form-group justify-content-center">             
             <label for="name" class="col-3 col-form-label">Drug Name</label>
@@ -19,7 +19,7 @@
         </div>
         <div class="row mb-3 form-group justify-content-center">
             <label for="card" class="col-3 col-form-label">Tablets per Card</label>
-            <input type="number" name="card" value="<%= drug.card %>" placeholder="Tablets per Card" min="1" max="500" class="col-xs-8 col-md-4">
+            <input type="number" name="card" value="<%= drug.card %>" placeholder="Tablets per Card" min="1" step="1" class="col-xs-8 col-md-4">
         </div>
         <div class="row mb-3 form-group justify-content-center">
             <label for="pack" class="col-3 col-form-label">Tablets per Pack</label>
@@ -44,3 +44,38 @@
 <!-- add footer -->
 <%- include('includes/_footer') %>
 <!-- end footer-->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+  const editForm = document.getElementById("update_drug");
+  if (editForm) {
+    editForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const id = editForm.getAttribute("data-id");
+      const formData = {
+        name: editForm.name.value,
+        card: Number(editForm.card.value),
+        pack: Number(editForm.pack.value),
+        perDay: Number(editForm.perDay.value),
+        dosage: editForm.dosage.value
+      };
+      try {
+        const response = await fetch(`/api/drugs/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        });
+        const result = await response.json();
+        if (response.ok) {
+          alert(result.message || "Drug updated successfully!");
+          location.replace("/manage");
+          return;
+        } else {
+          alert("Error: " + (result.message || "Update failed."));
+        }
+      } catch (error) {
+        alert("Request failed: " + error);
+      }
+    });
+  }
+});
+</script>

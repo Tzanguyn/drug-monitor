@@ -26,6 +26,11 @@
 				<td><%= drugs[i].name %></td>
 				<td><%= Math.ceil(pills/drugs[i].card) %> (<%= drugs[i].pack/drugs[i].card %> <% if (drugs[i].pack/drugs[i].card < 2) { %> card <%} else { %> cards <% } %> per pack)</td>
 				<td><%= Math.ceil(pills/drugs[i].pack) %></td>
+				<td>
+				  <button class="buy-btn" data-id="<%= drugs[i]._id %>" data-quantity="<%= Math.ceil(pills/drugs[i].pack) %>">
+				    Mua
+				  </button>
+				</td>
 			</tr>
 			<% } %> <!--  End loop -->
 		</tbody>
@@ -35,4 +40,29 @@
 <!-- add footer -->
 <%- include('includes/_footer') %>
 <!-- end footer-->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".buy-btn").forEach(function(btn) {
+    btn.addEventListener("click", function(e) {
+      e.preventDefault();
+      const id = btn.getAttribute("data-id");
+      const quantity = btn.getAttribute("data-quantity");
+      fetch(`/api/drugs/${id}/purchase`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity: Number(quantity) })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if(result.success) {
+          alert(result.message);
+          location.reload();
+        } else {
+          alert("Error: " + result.message);
+        }
+      });
+    });
+  });
+});
+</script>
 

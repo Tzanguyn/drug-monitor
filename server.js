@@ -28,4 +28,16 @@ app.use('/',require('./server/routes/routes'));//Pulls the routes file whenever 
 app.listen(PORT, function() {//specifies port to listen on
 	console.log('listening on '+ PORT);
 	console.log(`Welcome to the Drug Monitor App at http://localhost:${PORT}`);
-})
+});
+
+// Error handler for 404 - Not Found
+app.use((req, res, next) => {
+  res.status(404).render('error', { message: 'Page Not Found', error: {} });
+});
+
+// General error handler for other errors
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500);
+  res.render('error', { message: err.message, error: err });
+});

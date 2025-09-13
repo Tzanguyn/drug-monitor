@@ -19,16 +19,27 @@ $("#update_drug").submit(function(event){// on clicking submit
         data[n['name']] = n['value']
     })
 
+    // Convert string values to appropriate types for validation
+    data.card = parseInt(data.card);
+    data.pack = parseInt(data.pack);
+    data.perDay = parseInt(data.perDay);
 
     var request = {//use a put API request to use data from above to replace what's on database
-    "url" : `https://${url}/api/drugs/${data.id}`,
+    "url" : `http://${url}/api/drugs/${data.id}`,
     "method" : "PUT",
     "data" : data
 }
 
 $.ajax(request).done(function(response){
     alert(data.name + " Updated Successfully!");
-		window.location.href = "/manage";//redirects to index after alert is closed
+		window.location.href = "/manage";//redirects to manage page after alert is closed
+    }).fail(function(xhr, status, error) {
+        // Handle validation errors and other errors
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+            alert("Error: " + xhr.responseJSON.message);
+        } else {
+            alert("Error updating drug. Please try again.");
+        }
     })
 
 })
@@ -39,7 +50,7 @@ if(window.location.pathname == "/manage"){//since items are listed on manage
         let id = $(this).attr("data-id") // pick the value from the data-id
 
         let request = {//save API request in variable
-            "url" : `https://${url}/api/drugs/${id}`,
+            "url" : `http://${url}/api/drugs/${id}`,
             "method" : "DELETE"
         }
 
