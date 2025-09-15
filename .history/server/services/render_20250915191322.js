@@ -42,14 +42,12 @@ exports.dosage= function(req, res) {
 }
 
 exports.purchase = function(req, res) {
+    // Lấy danh sách thuốc
     axios.get(`${BASE_URI}:${PORT}/api/drugs`)
         .then(function(response) {
             const drugs = response.data;
-            res.render('purchase', { 
-                title: 'Purchase Drugs', // Thêm dòng này
-                drugs, 
-                purchasedDrugs: [] 
-            });
+            // Nếu chưa có dữ liệu đã mua, truyền mảng rỗng
+            res.render('purchase', { drugs, purchasedDrugs: [] });
         })
         .catch(err => {
             res.status(500).send('Error loading purchase page');

@@ -1,6 +1,9 @@
 const axios = require('axios');//http client used for making client & server side http requests in node
 const PORT = process.env.PORT || 3100; //uses either what's in our env or 3100 as our port (you can use any unused port)
 const BASE_URI = process.env.BASE_URI || 'http://localhost'; //uses either what's in our env or 3100 as our port (you can use any unused port)
+const Drug = require('../model/drug');
+const PurchasedDrug = require('../model/purchasedDrug'); // Nếu có model này
+
 exports.home= function(req, res) {
             res.render('index', { title: `Home`});
 }
@@ -41,18 +44,13 @@ exports.dosage= function(req, res) {
         })
 }
 
-exports.purchase = function(req, res) {
-    axios.get(`${BASE_URI}:${PORT}/api/drugs`)
-        .then(function(response) {
-            const drugs = response.data;
-            res.render('purchase', { 
-                title: 'Purchase Drugs', // Thêm dòng này
-                drugs, 
-                purchasedDrugs: [] 
-            });
-        })
-        .catch(err => {
-            res.status(500).send('Error loading purchase page');
-        });
+exports.purchase = async (req, res) => {
+  try {
+    const drugs = await Drug.find();
+    const purchasedDrugs = await PurchasedDrug.find(); // hoặc lấy từ DB của bạn
+    res.render('purchase', { drugs, purchasedDrugs });
+  } catch (err) {
+    res.status(500).send('Error loading purchase page');
+  }
 };
 
